@@ -190,7 +190,7 @@ declare global {
 
       export interface Metric {
         timing: number;
-        timestamp: number;
+        timestamp?: number;
       }
 
       export interface LanternMetric {
