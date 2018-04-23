@@ -300,7 +300,8 @@ if (typeof module !== 'undefined' && module.exports) {
  *     value: (string|number|undefined),
  *     summary: (DetailsRenderer.OpportunitySummary|undefined),
  *     granularity: (number|undefined),
- *     displayUnit: (string|undefined)
+ *     displayUnit: (string|undefined),
+ *     flagged: (boolean|undefined)
  * }}
  */
 DetailsRenderer.DetailsJSON; // eslint-disable-line no-unused-expressions
