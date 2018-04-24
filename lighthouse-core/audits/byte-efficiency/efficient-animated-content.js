@@ -34,6 +34,7 @@ class EfficientAnimatedContent extends ByteEfficiencyAudit {
   /**
    * Calculate rough savings percentage based on 1000 real gifs transcoded to video
    * @param {number} bytes
+   * @return {number} rough savings percentage
    * @see https://github.com/GoogleChrome/lighthouse/issues/4696#issuecomment-380296510 bytes
    */
   static getPercentSavings(bytes) {
