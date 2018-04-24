@@ -11,7 +11,8 @@
 const WebInspector = require('../../lib/web-inspector');
 const ByteEfficiencyAudit = require('./byte-efficiency-audit');
 
-// the threshold for the size of GIFs wich we flag as unoptimized
+// If GIFs are above this size, we'll flag them
+// See https://github.com/GoogleChrome/lighthouse/pull/4885#discussion_r178406623 and https://github.com/GoogleChrome/lighthouse/issues/4696#issuecomment-370979920
 const GIF_BYTE_THRESHOLD = 100 * 1024;
 
 class EfficientAnimatedContent extends ByteEfficiencyAudit {
@@ -22,21 +23,21 @@ class EfficientAnimatedContent extends ByteEfficiencyAudit {
     return {
       name: 'efficient-animated-content',
       scoreDisplayMode: ByteEfficiencyAudit.SCORING_MODES.NUMERIC,
-      description: 'Use a video formats for animated content',
+      description: 'Use video formats for animated content',
       helpText: 'Large GIFs are inefficient for delivering animated content. Consider using ' +
         'MPEG4/WebM videos for animations and PNG/WebP for static images instead of GIF to save ' +
-        'network bytes. [Learn more](https://en.wikipedia.org/wiki/Video_alternative_to_GIF)',
+        'network bytes. [Learn more](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/replace-animated-gifs-with-video/)',
       requiredArtifacts: ['devtoolsLogs'],
     };
   }
 
   /**
-   * Calculate savings percentage
+   * Calculate rough savings percentage based on 1000 real gifs transcoded to video
    * @param {number} bytes
-   * @see https://github.com/GoogleChrome/lighthouse/issues/4696#issuecomment-380296510} bytes
+   * @see https://github.com/GoogleChrome/lighthouse/issues/4696#issuecomment-380296510 bytes
    */
   static getPercentSavings(bytes) {
-    return (29.1 * Math.log10(bytes) - 100.7) / 100;
+    return Math.round((29.1 * Math.log10(bytes) - 100.7)) / 100;
   }
 
   /**

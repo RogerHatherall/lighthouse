@@ -36,7 +36,7 @@ describe('Page uses videos for animated GIFs', () => {
     assert.equal(results.length, 1);
     assert.equal(results[0].url, 'https://example.com/example2.gif');
     assert.equal(results[0].totalBytes, 110000);
-    assert.equal(Math.round(results[0].wastedBytes), 50605);
+    assert.equal(Math.round(results[0].wastedBytes), 50600);
   });
 
   it(`shouldn't flag content that looks like a gif but isn't`, async () => {
