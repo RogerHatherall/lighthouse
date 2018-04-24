@@ -17,7 +17,7 @@ const GIF_BYTE_THRESHOLD = 100 * 1024;
 
 class EfficientAnimatedContent extends ByteEfficiencyAudit {
   /**
-   * @return {!AuditMeta}
+   * @return {LH.Audit.Meta}
    */
   static get meta() {
     return {
@@ -41,8 +41,8 @@ class EfficientAnimatedContent extends ByteEfficiencyAudit {
   }
 
   /**
-   * @param {!Artifacts} artifacts
-   * @return {!AuditResult}
+   * @param {!LH.Artifacts} artifacts
+   * @return {Promise<LH.Audit.Product>}
    */
   static async audit_(artifacts) {
     const devtoolsLogs = artifacts.devtoolsLogs[EfficientAnimatedContent.DEFAULT_PASS];
@@ -54,6 +54,7 @@ class EfficientAnimatedContent extends ByteEfficiencyAudit {
         record.resourceSize > GIF_BYTE_THRESHOLD
     );
 
+    /** @type {Array<{url: string, totalBytes: number, wastedBytes: number}>}*/
     const results = unoptimizedContent.map(record => {
       return {
         url: record.url,
