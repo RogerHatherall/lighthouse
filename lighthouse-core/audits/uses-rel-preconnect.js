@@ -18,7 +18,7 @@ const PRECONNECT_SOCKET_MAX_IDLE = 15;
 
 class UsesRelPreconnectAudit extends Audit {
   /**
-   * @return {!AuditMeta}
+   * @return {LH.Audit.Meta}
    */
   static get meta() {
     return {
@@ -35,38 +35,38 @@ class UsesRelPreconnectAudit extends Audit {
 
   /**
    * Check if record has valid timing
-   * @param {!WebInspector.NetworkRequest} record
+   * @param {!LH.WebInspector.NetworkRequest} record
    * @return {!boolean}
    */
   static hasValidTiming(record) {
-    return record.timing && record.timing.connectEnd > 0 && record.timing.connectStart > 0;
+    return record._timing && record._timing.connectEnd > 0 && record._timing.connectStart > 0;
   }
 
   /**
    * Check is the connection is already open
-   * @param {!WebInspector.NetworkRequest} record
+   * @param {!LH.WebInspector.NetworkRequest} record
    * @return {!boolean}
    */
   static hasAlreadyConnectedToOrigin(record) {
     return (
-      record.timing.dnsEnd - record.timing.dnsStart === 0 &&
-      record.timing.connectEnd - record.timing.connectStart === 0
+      record._timing.dnsEnd - record._timing.dnsStart === 0 &&
+      record._timing.connectEnd - record._timing.connectStart === 0
     );
   }
 
   /**
    * Check is the connection has started before the socket idle time
-   * @param {!WebInspector.NetworkRequest} record
-   * @param {!WebInspector.NetworkRequest} mainResource
+   * @param {!LH.WebInspector.NetworkRequest} record
+   * @param {!LH.WebInspector.NetworkRequest} mainResource
    * @return {!boolean}
    */
   static socketStartTimeIsBelowThreshold(record, mainResource) {
-    return Math.max(0, record._startTime - mainResource._endTime) < PRECONNECT_SOCKET_MAX_IDLE;
+    return Math.max(0, record.startTime - mainResource.endTime) < PRECONNECT_SOCKET_MAX_IDLE;
   }
 
   /**
-   * @param {!Artifacts} artifacts
-   * @return {!AuditResult}
+   * @param {LH.Artifacts} artifacts
+   * @return {Promise<LH.Audit.Product>}
    */
   static async audit(artifacts) {
     const devtoolsLogs = artifacts.devtoolsLogs[UsesRelPreconnectAudit.DEFAULT_PASS];
@@ -77,51 +77,63 @@ class UsesRelPreconnectAudit extends Audit {
       artifacts.requestMainResource(devtoolsLogs),
     ]);
 
-    const origins = networkRecords
-      .filter(record => {
-        return (
+    /** @type {Map<string, LH.WebInspector.NetworkRequest[]>}  */
+    const origins = new Map();
+    networkRecords
+      .forEach(record => {
+        if (
           // filter out all resources where timing info was invalid
-          UsesRelPreconnectAudit.hasValidTiming(record) &&
+          !UsesRelPreconnectAudit.hasValidTiming(record) ||
           // filter out all resources that are loaded by the document
-          record.initiatorRequest() !== mainResource &&
-          // filter out all resources that have the same origin
-          mainResource.parsedURL.securityOrigin() !== record.parsedURL.securityOrigin() &&
+          record.initiatorRequest() === mainResource ||
           // filter out urls that do not have an origin (data, ...)
-          !!record.parsedURL.securityOrigin() &&
+          !record.parsedURL || !record.parsedURL.securityOrigin() ||
+          // filter out all resources that have the same origin
+          mainResource.parsedURL.securityOrigin() === record.parsedURL.securityOrigin() ||
           // filter out all resources where origins are already resolved
-          !UsesRelPreconnectAudit.hasAlreadyConnectedToOrigin(record) &&
+          UsesRelPreconnectAudit.hasAlreadyConnectedToOrigin(record) ||
           // make sure the requests are below the PRECONNECT_SOCKET_MAX_IDLE (15s) mark
-          UsesRelPreconnectAudit.socketStartTimeIsBelowThreshold(record, mainResource)
-        );
-      })
-      .map(record => record.parsedURL.securityOrigin());
+          !UsesRelPreconnectAudit.socketStartTimeIsBelowThreshold(record, mainResource)
+        ) {
+          return;
+        }
 
-    const preconnectOrigins = new Set(origins);
-    let results = [];
-    preconnectOrigins.forEach(origin => {
-      const records = networkRecords.filter(record => record.parsedURL.securityOrigin() === origin);
-
-      // Sometimes requests are done simultaneous and the connection has not been made
-      // chrome will try to connect for each network record, we get the first record
-      let firstRecordOfOrigin;
-      records.forEach(record => {
-        if (!firstRecordOfOrigin || record._startTime < firstRecordOfOrigin._startTime) {
-          firstRecordOfOrigin = record;
+        const securityOrigin = record.parsedURL.securityOrigin();
+        if (origins.has(securityOrigin)) {
+          const records = origins.get(securityOrigin);
+          if (records) {
+            records.push(record);
+          }
+        } else {
+          origins.set(securityOrigin, [record]);
         }
       });
 
+    /** @type {Array<{url: string, type: 'ms', wastedMs: number}>}*/
+    let results = [];
+    origins.forEach(records => {
+      // Sometimes requests are done simultaneous and the connection has not been made
+      // chrome will try to connect for each network record, we get the first record
+      const firstRecordOfOrigin = records.reduce((firstRecordOfOrigin, record) => {
+        if (!firstRecordOfOrigin || record.startTime < firstRecordOfOrigin.startTime) {
+          return record;
+        }
+
+        return firstRecordOfOrigin;
+      });
+
       const connectionTime =
-        firstRecordOfOrigin.timing.connectEnd - firstRecordOfOrigin.timing.dnsStart;
+        firstRecordOfOrigin._timing.connectEnd - firstRecordOfOrigin._timing.dnsStart;
       const timeBetweenMainResourceAndDnsStart =
-        firstRecordOfOrigin._startTime * 1000 -
-        mainResource._endTime * 1000 +
-        firstRecordOfOrigin.timing.dnsStart;
+        firstRecordOfOrigin.startTime * 1000 -
+        mainResource.endTime * 1000 +
+        firstRecordOfOrigin._timing.dnsStart;
       const wastedMs = Math.min(connectionTime, timeBetweenMainResourceAndDnsStart);
       maxWasted = Math.max(wastedMs, maxWasted);
       results.push({
-        url: new URL(firstRecordOfOrigin.url).origin,
+        url: firstRecordOfOrigin.parsedURL.securityOrigin(),
         type: 'ms',
-        wastedMs,
+        wastedMs: wastedMs,
       });
     });
 

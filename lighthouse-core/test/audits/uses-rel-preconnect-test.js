@@ -16,7 +16,7 @@ const mainResource = {
   parsedURL: {
     securityOrigin: () => 'https://www.example.com',
   },
-  _endTime: 1,
+  endTime: 1,
 };
 
 describe('Performance: uses-rel-preconnect audit', () => {
@@ -88,7 +88,7 @@ describe('Performance: uses-rel-preconnect audit', () => {
       {
         url: 'https://cdn.example.com/request',
         initiatorRequest: () => null,
-        timing: {
+        _timing: {
           dnsStart: -1,
           dnsEnd: -1,
           connectEnd: -1,
@@ -138,8 +138,8 @@ describe('Performance: uses-rel-preconnect audit', () => {
         parsedURL: {
           securityOrigin: () => 'https://cdn.example.com',
         },
-        _startTime: 2,
-        timing: {
+        startTime: 2,
+        _timing: {
           dnsStart: 100,
           connectStart: 150,
           connectEnd: 300,
@@ -151,8 +151,8 @@ describe('Performance: uses-rel-preconnect audit', () => {
         parsedURL: {
           securityOrigin: () => 'https://cdn.example.com',
         },
-        _startTime: 3,
-        timing: {
+        startTime: 3,
+        _timing: {
           dnsStart: 300,
           connectStart: 350,
           connectEnd: 400,
@@ -182,8 +182,8 @@ describe('Performance: uses-rel-preconnect audit', () => {
         parsedURL: {
           securityOrigin: () => 'https://cdn.example.com',
         },
-        _startTime: 2,
-        timing: {
+        startTime: 2,
+        _timing: {
           dnsStart: 100,
           connectStart: 250,
           connectEnd: 300,
@@ -195,8 +195,8 @@ describe('Performance: uses-rel-preconnect audit', () => {
         parsedURL: {
           securityOrigin: () => 'https://othercdn.example.com',
         },
-        _startTime: 1.2,
-        timing: {
+        startTime: 1.2,
+        _timing: {
           dnsStart: 100,
           connectStart: 200,
           connectEnd: 600,
