@@ -14,9 +14,8 @@ class ManifestShortNameLength extends MultiCheckAudit {
   static get meta() {
     return {
       name: 'manifest-short-name-length',
-      description: 'Manifest\'s `short_name` won\'t be truncated when displayed on homescreen',
-      failureDescription: 'Manifest\'s `short_name` will be truncated when displayed ' +
-          'on homescreen',
+      description: 'The `short_name` won\'t be truncated on the homescreen',
+      failureDescription: 'The `short_name` will be truncated on the homescreen',
       helpText: 'Make your app\'s `short_name` fewer than 12 characters to ' +
           'ensure that it\'s not truncated on homescreens. [Learn ' +
           'more](https://developers.google.com/web/tools/lighthouse/audits/manifest-short_name-is-not-truncated).',
