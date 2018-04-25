@@ -5,9 +5,9 @@
  */
 'use strict';
 
-const Audit = require('./audit');
+const MultiCheckAudit = require('./multi-check-audit');
 
-class ManifestShortNameLength extends Audit {
+class ManifestShortNameLength extends MultiCheckAudit {
   /**
    * @return {!AuditMeta}
    */
@@ -28,26 +28,24 @@ class ManifestShortNameLength extends Audit {
    * @param {!Artifacts} artifacts
    * @return {!AuditResult}
    */
-  static audit(artifacts) {
+  static audit_(artifacts) {
+    const failures = [];
+    const warnings = [];
+
     return artifacts.requestManifestValues(artifacts.Manifest).then(manifestValues => {
+      const result = {warnings, failures, manifestValues};
+
       if (manifestValues.isParseFailure) {
-        return {
-          rawValue: false,
-        };
+        failures.push(manifestValues.parseFailureReason);
+        return result;
       }
 
-      const hasShortName = manifestValues.allChecks.find(i => i.id === 'hasShortName').passing;
-      if (!hasShortName) {
-        return {
-          rawValue: false,
-          debugString: 'No short_name found in manifest.',
-        };
-      }
+      const shortNameCheckIds = ['hasShortName', 'shortNameLength'];
+      manifestValues.allChecks.filter(item => shortNameCheckIds.includes(item.id)).forEach(item => {
+        if (!item.passing) failures.push(item.failureText);
+      });
 
-      const isShortEnough = manifestValues.allChecks.find(i => i.id === 'shortNameLength').passing;
-      return {
-        rawValue: isShortEnough,
-      };
+      return result;
     });
   }
 }

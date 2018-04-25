@@ -64,7 +64,7 @@ class ManifestValues extends ComputedArtifact {
       },
       {
         id: 'shortNameLength',
-        failureText: 'Manifest `short_name` will be truncated when displayed on the homescreen',
+        failureText: `Manifest\'s \`short_name\` is too long (>${SUGGESTED_SHORTNAME_LENGTH} characters) to be displayed on a homescreen without truncation`,
         validate: manifest => !!manifest.value.short_name.value &&
             manifest.value.short_name.value.length <= SUGGESTED_SHORTNAME_LENGTH,
       },
