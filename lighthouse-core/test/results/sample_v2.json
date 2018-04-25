@@ -3146,8 +3146,8 @@
       },
       "scoreDisplayMode": "numeric",
       "name": "efficient-animated-content",
-      "description": "Use a video formats for animated content",
-      "helpText": "Large GIFs are inefficient for delivering animated content. Consider using MPEG4/WebM videos for animations and PNG/WebP for static images instead of GIF to save network bytes. [Learn more](https://en.wikipedia.org/wiki/Video_alternative_to_GIF)",
+      "description": "Use video formats for animated content",
+      "helpText": "Large GIFs are inefficient for delivering animated content. Consider using MPEG4/WebM videos for animations and PNG/WebP for static images instead of GIF to save network bytes. [Learn more](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/replace-animated-gifs-with-video/)",
       "details": {
         "type": "table",
         "headings": [],
