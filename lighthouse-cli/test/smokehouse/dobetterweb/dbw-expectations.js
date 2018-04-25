@@ -186,12 +186,14 @@ module.exports = [
         },
       },
       'efficient-animated-content': {
-        score: '<1',
+        score: 0,
+        rawValue: '>=3300',
         details: {
           items: [
             {
               url: 'http://localhost:10200/dobetterweb/lighthouse-rotating.gif',
               totalBytes: 934285,
+              wastedBytes: 682028,
             },
           ],
         },

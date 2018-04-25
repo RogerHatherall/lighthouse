@@ -60,8 +60,8 @@ class EfficientAnimatedContent extends ByteEfficiencyAudit {
       return {
         url: record.url,
         totalBytes: record.resourceSize,
-        wastedBytes: record.resourceSize *
-          EfficientAnimatedContent.getPercentSavings(record.resourceSize),
+        wastedBytes: Math.round(record.resourceSize *
+          EfficientAnimatedContent.getPercentSavings(record.resourceSize)),
       };
     });
 
