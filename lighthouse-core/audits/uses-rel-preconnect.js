@@ -9,7 +9,6 @@
 const Audit = require('./audit');
 const Util = require('../report/v2/renderer/util');
 const UnusedBytes = require('./byte-efficiency/byte-efficiency-audit');
-const URL = require('../lib/url-shim');
 // Preconnect establishes a "clean" socket. Chrome's socket manager will keep an unused socket
 // around for 10s. Meaning, the time delta between processing preconnect a request should be <10s,
 // otherwise it's wasted. We add a 5s margin so we are sure to capture all key requests.
